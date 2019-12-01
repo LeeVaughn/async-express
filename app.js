@@ -8,7 +8,7 @@ app.set('view engine', 'pug');
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static('public'));
 
-//PROMISES
+// ASYNC/AWAIT
 function getUsers() {
   return new Promise( (resolve, reject) => {
     fs.readFile("data.json", "utf-8", (err, data) => {
@@ -22,17 +22,41 @@ function getUsers() {
   });
 }
 
-app.get('/', (req,res) => {
-  getUsers()
-    .then( (users) => {
-      res.render("index", { title: "Users", users: users.users });
-    })
-    .catch( (err) => {
-      res.render("error", { error: err });
-    })
+app.get('/', async (req,res) => {
+  try {
+    const users = await getUsers();
+
+    res.render("index", { title: "Users", users: users.users });
+  } catch(err) {
+    res.render("error", { error: err });
+  }
 }); 
 
-// //CALLBACKS
+// // PROMISES
+// function getUsers() {
+//   return new Promise( (resolve, reject) => {
+//     fs.readFile("data.json", "utf-8", (err, data) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         const users = JSON.parse(data);
+//         resolve(users);
+//       }
+//     });
+//   });
+// }
+
+// app.get('/', (req,res) => {
+//   getUsers()
+//     .then( (users) => {
+//       res.render("index", { title: "Users", users: users.users });
+//     })
+//     .catch( (err) => {
+//       res.render("error", { error: err });
+//     })
+// }); 
+
+// // CALLBACKS
 // function getUsers(cb) {
 //   fs.readFile('data.json', 'utf8', (err, data) => {
 //     if (err) return cb(err);
