@@ -8,7 +8,18 @@ app.set('view engine', 'pug');
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static('public'));
 
-// ASYNC/AWAIT
+// middleware to wrap each route in a try/catch block
+function asyncHandler(cb) {
+  return async(req, res, next) => {
+    try {
+      await cb(req, res, next);
+    } catch(err) {
+      res.render("error", { error: err });
+    }
+  }
+}
+
+// ASYNC/AWAIT W/ MIDDLEWARE
 function getUsers() {
   return new Promise( (resolve, reject) => {
     fs.readFile("data.json", "utf-8", (err, data) => {
@@ -22,15 +33,35 @@ function getUsers() {
   });
 }
 
-app.get('/', async (req,res) => {
-  try {
-    const users = await getUsers();
+app.get('/', asyncHandler(async (req, res) => {
+  const users = await getUsers();
 
-    res.render("index", { title: "Users", users: users.users });
-  } catch(err) {
-    res.render("error", { error: err });
-  }
-}); 
+  res.render("index", { title: "Users", users: users.users });
+}));
+
+// // ASYNC/AWAIT
+// function getUsers() {
+//   return new Promise( (resolve, reject) => {
+//     fs.readFile("data.json", "utf-8", (err, data) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         const users = JSON.parse(data);
+//         resolve(users);
+//       }
+//     });
+//   });
+// }
+
+// app.get('/', async (req, res) => {
+//   try {
+//     const users = await getUsers();
+
+//     res.render("index", { title: "Users", users: users.users });
+//   } catch(err) {
+//     res.render("error", { error: err });
+//   }
+// }); 
 
 // // PROMISES
 // function getUsers() {
